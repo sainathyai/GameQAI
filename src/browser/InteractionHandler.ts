@@ -246,7 +246,7 @@ export class InteractionHandler {
           await this.wait(delay);
         }
       } catch (error) {
-        log.warn('Interaction in sequence failed, continuing', error, { action });
+        log.warn('Interaction in sequence failed, continuing', { action, error: error instanceof Error ? error.message : String(error) });
         // Continue with next action even if one fails
       }
     }

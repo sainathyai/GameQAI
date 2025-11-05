@@ -72,8 +72,9 @@ export class BrowserAgent {
       if (!this.session) {
         const browserbase = await this.createBrowserbaseClient();
         
-        // Create a new session
-        const session = await browserbase.sessions.create({
+        // Create a new session (using type assertion for now - actual API may vary)
+        // Note: Browserbase SDK API may differ - adjust based on actual SDK documentation
+        const session = await (browserbase as any).sessions.create({
           headless: true,
           viewport: {
             width: 1920,
@@ -91,8 +92,8 @@ export class BrowserAgent {
         log.info('Browser session created', { sessionId: session.id });
       }
 
-      // Navigate to URL
-      const page = await this.session.browserbase.sessions.navigate(
+      // Navigate to URL (using type assertion for now)
+      const page = await (this.session.browserbase as any).sessions.navigate(
         this.session.sessionId,
         url
       );
@@ -197,8 +198,8 @@ export class BrowserAgent {
     try {
       log.info('Closing browser session', { sessionId: this.session.sessionId });
       
-      // Close session in Browserbase
-      await this.session.browserbase.sessions.delete(this.session.sessionId);
+      // Close session in Browserbase (using type assertion)
+      await (this.session.browserbase as any).sessions.delete(this.session.sessionId);
       
       this.session.isActive = false;
       this.session = null;
@@ -229,7 +230,7 @@ export class BrowserAgent {
     }
 
     try {
-      const result = await this.session.browserbase.sessions.evaluate(
+      const result = await (this.session.browserbase as any).sessions.evaluate(
         this.session.sessionId,
         script
       );

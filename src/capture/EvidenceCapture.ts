@@ -8,8 +8,14 @@ import { BrowserAgent } from '../browser/BrowserAgent.js';
 import { Screenshot } from '../core/types.js';
 import { log } from '../utils/logger.js';
 import { GameQAError, ErrorType } from '../core/types.js';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
+
+// Note: Screenshot capture implementation is structured
+// Actual screenshot bytes will come from Browserbase API
+
+// Note: Screenshot capture implementation is structured
+// Actual screenshot bytes will come from Browserbase API
 
 /**
  * Evidence Capture class
@@ -46,7 +52,9 @@ export class EvidenceCapture {
       log.info('Taking screenshot', { index, description, sessionId });
 
       // Get screenshot from Browserbase
-      const screenshotData = await this.browserAgent.executeScript<string>(`
+      // Note: Browserbase SDK should provide screenshot API
+      // This is a placeholder - actual implementation depends on SDK API
+      await this.browserAgent.executeScript<string>(`
         (async function() {
           // Browserbase should provide screenshot API
           // For now, we'll use canvas to html2canvas approach or Browserbase's native API
@@ -113,17 +121,17 @@ export class EvidenceCapture {
     sessionId: string,
     timestamps: Array<{ index: number; description: string; delay: number }>
   ): Promise<string[]> {
-    const paths: string[] = [];
+      const paths: string[] = [];
 
-    for (const ts of timestamps) {
-      // Wait for the specified delay
-      await this.wait(ts.delay * 1000);
+      for (const timestamp of timestamps) {
+        // Wait for the specified delay
+        await this.wait(timestamp.delay * 1000);
 
-      try {
-        const path = await this.takeScreenshot(ts.index, ts.description, sessionId);
-        paths.push(path);
-      } catch (error) {
-        log.warn('Screenshot failed, continuing', error, { index: ts.index });
+        try {
+          const path = await this.takeScreenshot(timestamp.index, timestamp.description, sessionId);
+          paths.push(path);
+        } catch (error) {
+          log.warn('Screenshot failed, continuing', { index: timestamp.index, error: error instanceof Error ? error.message : String(error) });
         // Continue with next screenshot
       }
     }

@@ -17,8 +17,7 @@ import { log } from './utils/logger.js';
  * @returns Promise that resolves with test result
  */
 export async function handler(
-  event: string | { url: string; options?: TestOptions },
-  context?: unknown
+  event: string | { url: string; options?: TestOptions }
 ): Promise<TestResult> {
   try {
     // Extract URL and options from event

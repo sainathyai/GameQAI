@@ -7,7 +7,7 @@
 
 import { existsSync, mkdirSync } from 'fs';
 import winston from 'winston';
-import { LogLevel, AppConfig } from '../core/types.js';
+import { AppConfig } from '../core/types.js';
 import { getConfig } from '../core/ConfigManager.js';
 
 // Ensure logs directory exists

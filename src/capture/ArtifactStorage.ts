@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { Screenshot, ConsoleLog, ErrorLog } from '../core/types.js';
+import { ConsoleLog, ErrorLog } from '../core/types.js';
 import { log } from '../utils/logger.js';
 import { getConfig } from '../core/ConfigManager.js';
 

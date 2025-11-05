@@ -5,12 +5,13 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "bun run src/index.ts",
-    "start": "bun run src/index.ts",
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src",
-    "typecheck": "bun run --bun tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
   },
   "dependencies": {
     "@browserbasehq/sdk": "^1.0.0",
@@ -22,10 +23,12 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.50.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.0",
     "vitest": "^1.0.0"
   },

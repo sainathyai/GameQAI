@@ -31,7 +31,7 @@ const ConfigSchema = z.object({
   }),
 });
 
-type ConfigInput = z.infer<typeof ConfigSchema>;
+// Type inference not needed - using direct validation
 
 /**
  * Loads and validates configuration from environment variables

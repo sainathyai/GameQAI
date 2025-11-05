@@ -52,8 +52,11 @@ function parseArgs(): { url: string; options: TestOptions } {
  */
 async function main() {
   try {
-    // Load configuration
-    const config = getConfig();
+    // Load environment variables
+    await import('dotenv/config');
+    
+    // Load configuration (will validate API keys)
+    getConfig();
 
     // Parse arguments
     const { url, options } = parseArgs();
@@ -96,8 +99,8 @@ async function main() {
   }
 }
 
-// Run if called directly
-if (import.meta.main) {
+// Run if called directly (Node.js check)
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('index.ts')) {
   main().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(2);

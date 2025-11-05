@@ -24,7 +24,7 @@ import {
 import { getConfig } from './ConfigManager.js';
 import { log } from '../utils/logger.js';
 import { GameQAError, ErrorType } from './types.js';
-import { retryWithType, handleErrorWithRetry } from '../utils/errors.js';
+import { retryWithType } from '../utils/errors.js';
 
 /**
  * Game QA Test Runner class
@@ -160,7 +160,7 @@ export class GameQATestRunner {
       });
       return result;
     } catch (error) {
-      log.warn('UI detection failed, continuing', error);
+      log.warn('UI detection failed, continuing', { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -190,7 +190,7 @@ export class GameQATestRunner {
             this.sessionId
           );
         } catch (error) {
-          log.warn('Failed to click start button', error);
+          log.warn('Failed to click start button', { error: error instanceof Error ? error.message : String(error) });
         }
       }
     }
@@ -250,7 +250,7 @@ export class GameQATestRunner {
 
     const evidence: TestEvidence = {
       session_id: this.sessionId,
-      game_url: this.browserAgent.getUrl() || '',
+      game_url: await this.browserAgent.getUrl() || '',
       screenshots,
       console_logs: consoleLogs,
       errors: errorLogs,
@@ -306,8 +306,8 @@ export class GameQATestRunner {
       timestamp: evidence.timestamp,
     });
 
-    // Save report
-    this.artifactStorage.saveReport(report);
+    // Save report (convert to plain object for JSON)
+    this.artifactStorage.saveReport(report as unknown as Record<string, unknown>);
   }
 
   /**
@@ -321,11 +321,11 @@ export class GameQATestRunner {
     const errorType =
       error instanceof GameQAError ? error.type : ErrorType.FATAL;
 
-    log.error('Test execution error', error, {
-      url,
-      errorType,
-      duration: testDuration,
-    });
+      log.error('Test execution error', error instanceof Error ? error : new Error(String(error)), {
+        url,
+        errorType: String(errorType),
+        duration: testDuration,
+      } as Record<string, unknown>);
 
     return {
       status: 'error' as TestStatus,

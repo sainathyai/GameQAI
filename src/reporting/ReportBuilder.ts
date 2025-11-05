@@ -55,9 +55,9 @@ export class ReportBuilder {
       errors_count: evidence.errors.length,
       screenshots_count: evidence.screenshots.length,
       ui_elements_detected:
-        evidence.ui_detection?.buttons.length || 0 +
-        evidence.ui_detection?.canvas.length || 0 +
-        evidence.ui_detection?.menus.length || 0,
+        (evidence.ui_detection?.buttons.length || 0) +
+        (evidence.ui_detection?.canvas.length || 0) +
+        (evidence.ui_detection?.menus.length || 0),
     };
 
     // Build report

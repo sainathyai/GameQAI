@@ -6,7 +6,7 @@
 
 import { TestEvidence } from '../core/types.js';
 import { log } from '../utils/logger.js';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 
 /**
  * Prompt Builder class
@@ -93,7 +93,7 @@ Evaluation Criteria:
 
     return screenshots
       .map(
-        (screenshot, index) =>
+        (screenshot) =>
           `Screenshot ${screenshot.index}: ${screenshot.description}\n` +
           `  Timestamp: ${screenshot.timestamp}\n` +
           `  Path: ${screenshot.file_path}\n` +

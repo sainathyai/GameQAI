@@ -162,7 +162,6 @@ export class AIEvaluator {
     // Calculate heuristics
     const errorCount = evidence.errors.length;
     const hasScreenshots = evidence.screenshots.length > 0;
-    const hasUI = evidence.ui_detection !== null;
     const hasInteractions = evidence.interactions.length > 0;
 
     // Determine results
