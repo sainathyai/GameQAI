@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Output directory (test reports and artifacts)
+output/
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Screenshots and artifacts (keep structure, ignore content)
+output/**/*.png
+output/**/*.jpg
+output/**/*.gif
+output/**/*.json
+!output/.gitkeep
+
+# Package manager
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Misc
+.cache/
+.parcel-cache/
+
