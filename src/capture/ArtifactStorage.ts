@@ -18,11 +18,21 @@ import { getConfig } from '../core/ConfigManager.js';
 export class ArtifactStorage {
   private outputDir: string;
   private sessionId: string;
+  private config: Awaited<ReturnType<typeof getConfig>> | null = null;
 
   constructor(sessionId?: string) {
-    const config = getConfig();
-    this.outputDir = config.output.dir;
+    this.outputDir = process.env.OUTPUT_DIR || './output'; // Default, will be updated when config loads
     this.sessionId = sessionId || this.generateSessionId();
+  }
+
+  /**
+   * Initialize config (async)
+   */
+  private async initializeConfig(): Promise<void> {
+    if (!this.config) {
+      this.config = await getConfig();
+      this.outputDir = this.config.output.dir;
+    }
   }
 
   /**
@@ -50,7 +60,8 @@ export class ArtifactStorage {
    * 
    * @returns Path to session directory
    */
-  createSessionDirectory(): string {
+  async createSessionDirectory(): Promise<string> {
+    await this.initializeConfig();
     const sessionDir = join(this.outputDir, this.sessionId);
     const screenshotsDir = join(sessionDir, 'screenshots');
     const logsDir = join(sessionDir, 'logs');
@@ -74,8 +85,8 @@ export class ArtifactStorage {
    * @param logs - Array of console logs
    * @returns Path to saved log file
    */
-  saveConsoleLogs(logs: ConsoleLog[]): string {
-    const sessionDir = this.createSessionDirectory();
+  async saveConsoleLogs(logs: ConsoleLog[]): Promise<string> {
+    const sessionDir = await this.createSessionDirectory();
     const logFile = join(sessionDir, 'logs', 'console.log');
 
     const logContent = logs
@@ -97,8 +108,8 @@ export class ArtifactStorage {
    * @param errors - Array of error logs
    * @returns Path to saved error file
    */
-  saveErrorLogs(errors: ErrorLog[]): string {
-    const sessionDir = this.createSessionDirectory();
+  async saveErrorLogs(errors: ErrorLog[]): Promise<string> {
+    const sessionDir = await this.createSessionDirectory();
     const errorFile = join(sessionDir, 'logs', 'errors.log');
 
     const errorContent = errors
@@ -120,8 +131,8 @@ export class ArtifactStorage {
    * @param metadata - Metadata object
    * @returns Path to saved metadata file
    */
-  saveMetadata(metadata: Record<string, unknown>): string {
-    const sessionDir = this.createSessionDirectory();
+  async saveMetadata(metadata: Record<string, unknown>): Promise<string> {
+    const sessionDir = await this.createSessionDirectory();
     const metadataFile = join(sessionDir, 'metadata.json');
 
     const metadataContent = JSON.stringify(metadata, null, 2);
@@ -137,8 +148,8 @@ export class ArtifactStorage {
    * @param report - Test report object
    * @returns Path to saved report file
    */
-  saveReport(report: Record<string, unknown>): string {
-    const sessionDir = this.createSessionDirectory();
+  async saveReport(report: Record<string, unknown>): Promise<string> {
+    const sessionDir = await this.createSessionDirectory();
     const reportFile = join(sessionDir, 'report.json');
 
     const reportContent = JSON.stringify(report, null, 2);

@@ -30,7 +30,7 @@ import { retryWithType } from '../utils/errors.js';
  * Game QA Test Runner class
  */
 export class GameQATestRunner {
-  private config = getConfig();
+  private config: Awaited<ReturnType<typeof getConfig>> | null = null;
   private browserAgent: BrowserAgent;
   private uiDetector: UIPatternDetector;
   private interactionHandler: InteractionHandler;
@@ -50,14 +50,29 @@ export class GameQATestRunner {
     this.interactionHandler = new InteractionHandler(this.browserAgent);
     this.artifactStorage = new ArtifactStorage();
     this.sessionId = this.artifactStorage.getSessionId();
+    // Config will be loaded async in run() method
     this.evidenceCapture = new EvidenceCapture(
       this.browserAgent,
-      this.config.output.dir
+      './output' // Default, will be updated when config loads
     );
     this.consoleLogger = new ConsoleLogger(this.browserAgent);
     this.aiEvaluator = new AIEvaluator();
     this.promptBuilder = new PromptBuilder();
     this.reportBuilder = new ReportBuilder();
+  }
+
+  /**
+   * Initialize configuration (async)
+   */
+  private async initializeConfig(): Promise<void> {
+    if (!this.config) {
+      this.config = await getConfig();
+      // Update evidence capture with correct output dir
+      this.evidenceCapture = new EvidenceCapture(
+        this.browserAgent,
+        this.config.output.dir
+      );
+    }
   }
 
   /**
@@ -68,9 +83,12 @@ export class GameQATestRunner {
    * @returns Promise that resolves with test result
    */
   async run(url: string, options: TestOptions = {}): Promise<TestResult> {
+    // Initialize config first (async)
+    await this.initializeConfig();
+    
     this.startTime = Date.now();
-    const timeout = options.timeout || this.config.test.default_timeout;
-    const maxRetries = options.max_retries || this.config.test.max_retries;
+    const timeout = options.timeout || this.config!.test.default_timeout;
+    const maxRetries = options.max_retries || this.config!.test.max_retries;
 
     log.info('Starting game QA test', {
       url,
@@ -293,13 +311,13 @@ export class GameQATestRunner {
     log.info('Saving artifacts');
 
     // Save console logs
-    this.artifactStorage.saveConsoleLogs(evidence.console_logs);
+    await this.artifactStorage.saveConsoleLogs(evidence.console_logs);
 
     // Save error logs
-    this.artifactStorage.saveErrorLogs(evidence.errors);
+    await this.artifactStorage.saveErrorLogs(evidence.errors);
 
     // Save metadata
-    this.artifactStorage.saveMetadata({
+    await this.artifactStorage.saveMetadata({
       session_id: evidence.session_id,
       game_url: evidence.game_url,
       test_duration_seconds: evidence.test_duration_seconds,
@@ -307,7 +325,7 @@ export class GameQATestRunner {
     });
 
     // Save report (convert to plain object for JSON)
-    this.artifactStorage.saveReport(report as unknown as Record<string, unknown>);
+    await this.artifactStorage.saveReport(report as unknown as Record<string, unknown>);
   }
 
   /**

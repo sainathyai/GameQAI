@@ -27,13 +27,18 @@ export interface BrowserSession {
  */
 export class BrowserAgent {
   private session: BrowserSession | null = null;
-  private config = getConfig();
+  private config: Awaited<ReturnType<typeof getConfig>> | null = null;
 
   /**
    * Initialize Browserbase client
    */
   private async createBrowserbaseClient(): Promise<Browserbase> {
     try {
+      // Load config if not already loaded
+      if (!this.config) {
+        this.config = await getConfig();
+      }
+      
       const browserbase = new Browserbase({
         apiKey: this.config.browserbase.api_key,
         projectId: this.config.browserbase.project_id,

@@ -7,8 +7,6 @@
 
 import { existsSync, mkdirSync } from 'fs';
 import winston from 'winston';
-import { AppConfig } from '../core/types.js';
-import { getConfig } from '../core/ConfigManager.js';
 
 // Ensure logs directory exists
 if (!existsSync('logs')) {
@@ -23,11 +21,10 @@ let loggerInstance: winston.Logger | null = null;
 /**
  * Creates and configures Winston logger
  * 
- * @param config - Application configuration (optional, uses getConfig if not provided)
+ * @param logLevel - Log level (optional, defaults to 'info')
  * @returns Configured Winston logger instance
  */
-export function createLogger(config?: AppConfig): winston.Logger {
-  const appConfig = config || getConfig();
+export function createLogger(logLevel: string = 'info'): winston.Logger {
 
   const logFormat = winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -47,7 +44,7 @@ export function createLogger(config?: AppConfig): winston.Logger {
   );
 
   return winston.createLogger({
-    level: appConfig.logging.level,
+    level: logLevel,
     format: logFormat,
     defaultMeta: { service: 'gameqai' },
     transports: [
@@ -76,7 +73,9 @@ export function createLogger(config?: AppConfig): winston.Logger {
  */
 export function getLogger(): winston.Logger {
   if (!loggerInstance) {
-    loggerInstance = createLogger();
+    // Use environment variable or default to 'info'
+    const logLevel = process.env.LOG_LEVEL || 'info';
+    loggerInstance = createLogger(logLevel);
   }
   return loggerInstance;
 }

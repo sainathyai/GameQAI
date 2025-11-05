@@ -14,13 +14,14 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.925.0",
     "@browserbasehq/sdk": "^1.0.0",
     "@browserbasehq/stagehand": "^1.0.0",
-    "openai": "^4.0.0",
     "dotenv": "^16.0.0",
-    "zod": "^3.22.0",
+    "openai": "^4.0.0",
+    "uuid": "^9.0.0",
     "winston": "^3.11.0",
-    "uuid": "^9.0.0"
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -46,4 +47,3 @@
   "author": "",
   "license": "MIT"
 }
-

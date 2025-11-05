@@ -9,29 +9,128 @@ import OpenAI from 'openai';
 import { getConfig } from '../core/ConfigManager.js';
 import { log } from '../utils/logger.js';
 import { GameQAError, ErrorType, TestEvidence, EvaluationResult } from '../core/types.js';
+import { getSecretsManager } from '../utils/SecretsManager.js';
 
 /**
  * AI Evaluator class
  */
 export class AIEvaluator {
-  private openai: OpenAI;
-  private config = getConfig();
+  private openai: OpenAI | null = null;
+  private config: Awaited<ReturnType<typeof getConfig>> | null = null;
+  private secretsManager = getSecretsManager();
+  private useAWSSecrets: boolean;
 
   constructor() {
-    // Initialize OpenAI client
-    this.openai = new OpenAI({
-      apiKey: this.config.openai.api_key,
+    // Check if we should use AWS Secrets Manager
+    this.useAWSSecrets = 
+      process.env.USE_AWS_SECRETS === 'true' || 
+      !!process.env.AWS_SECRET_OPENAI_KEY;
+    
+    log.info('AI Evaluator initializing', {
+      useAWSSecrets: this.useAWSSecrets,
+      model: process.env.LLM_MODEL || process.env.OPENAI_MODEL || 'gpt-4o',
     });
+  }
+
+  /**
+   * Initialize OpenAI client (async to support AWS Secrets Manager)
+   */
+  private async initializeClient(): Promise<void> {
+    if (this.openai) {
+      return; // Already initialized
+    }
+
+    let apiKey: string;
+
+    // Fetch API key from AWS Secrets Manager if configured
+    if (this.useAWSSecrets) {
+      try {
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+        console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
+        apiKey = await this.secretsManager.getOpenAIKey(secretName, true);
+        console.log('[INFO] OpenAI API key retrieved from AWS Secrets Manager');
+      } catch (error) {
+        console.error('[ERROR] Failed to fetch OpenAI key from AWS Secrets Manager', error);
+        // Fallback to environment variable
+        apiKey = process.env.OPENAI_API_KEY || '';
+        if (!apiKey) {
+          throw new GameQAError(
+            ErrorType.VALIDATION_ERROR,
+            'OpenAI API key is required. Failed to fetch from AWS Secrets Manager and no environment variable set.'
+          );
+        }
+        console.warn('[WARN] Using fallback OpenAI API key from environment variable');
+      }
+    } else {
+      // Load config synchronously (for backward compatibility)
+      if (!this.config) {
+        this.config = await getConfig();
+      }
+      apiKey = this.config.openai.api_key;
+    }
 
     // Validate API key
-    if (!this.config.openai.api_key) {
+    if (!apiKey) {
       throw new GameQAError(
         ErrorType.VALIDATION_ERROR,
         'OpenAI API key is required'
       );
     }
 
-    log.info('AI Evaluator initialized', { model: this.config.openai.model });
+    // Initialize OpenAI client
+    this.openai = new OpenAI({
+      apiKey,
+    });
+
+    // Load model from config
+    if (!this.config) {
+      this.config = await getConfig();
+    }
+
+    console.log(`[INFO] AI Evaluator initialized (model: ${this.config.openai.model}, keySource: ${this.useAWSSecrets ? 'AWS Secrets Manager' : 'Environment Variable'})`);
+  }
+
+  /**
+   * Get OpenAI client (initializes if needed)
+   */
+  private async getClient(): Promise<OpenAI> {
+    if (!this.openai) {
+      await this.initializeClient();
+    }
+    return this.openai!;
+  }
+
+  /**
+   * Refresh API key from AWS Secrets Manager (for rotation)
+   */
+  async refreshApiKey(): Promise<void> {
+    if (this.useAWSSecrets) {
+      try {
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+        
+        // Invalidate cache
+        this.secretsManager.invalidateCache(secretName, 'api_key');
+        this.secretsManager.invalidateCache(secretName);
+        
+        // Fetch new key
+        const newApiKey = await this.secretsManager.getOpenAIKey(secretName, false);
+        
+        // Reinitialize client with new key
+        this.openai = new OpenAI({
+          apiKey: newApiKey,
+        });
+        
+        console.log('[INFO] OpenAI API key refreshed from AWS Secrets Manager');
+      } catch (error) {
+        console.error('[ERROR] Failed to refresh OpenAI API key', error);
+        throw new GameQAError(
+          ErrorType.API_FAILURE,
+          `Failed to refresh API key: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    } else {
+      console.warn('[WARN] API key refresh called but AWS Secrets Manager is not enabled');
+    }
   }
 
   /**
@@ -46,14 +145,23 @@ export class AIEvaluator {
     prompt: string
   ): Promise<EvaluationResult> {
     try {
+      // Ensure client is initialized
+      const client = await this.getClient();
+      
+      // Load config if not already loaded
+      if (!this.config) {
+        this.config = await getConfig();
+      }
+
       log.info('Starting AI evaluation', {
         sessionId: evidence.session_id,
         screenshots: evidence.screenshots.length,
         errors: evidence.errors.length,
+        model: this.config.openai.model,
       });
 
       // Call OpenAI API
-      const response = await this.openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: this.config.openai.model,
         messages: [
           {
