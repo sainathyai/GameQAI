@@ -2,10 +2,49 @@
 
 ## Quick Command
 
-### Option 1: Single Key
+### Option 1: Single Key (One-liner - Works in any shell)
 
 Replace `YOUR_OPENAI_API_KEY` with your actual OpenAI API key:
 
+**PowerShell:**
+```powershell
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"YOUR_OPENAI_API_KEY"}' --region us-east-1 --description "OpenAI API key"
+```
+
+**Bash/Git Bash:**
+```bash
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"YOUR_OPENAI_API_KEY"}' --region us-east-1 --description "OpenAI API key"
+```
+
+**Windows CMD:**
+```cmd
+aws secretsmanager create-secret --name openai/api-key --secret-string "{\"api_key\":\"YOUR_OPENAI_API_KEY\"}" --region us-east-1 --description "OpenAI API key"
+```
+
+### Option 2: Multiple Keys (Recommended for Production)
+
+Supports key rotation and automatic fallback:
+
+**PowerShell (One-liner):**
+```powershell
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"YOUR_KEY1","api_key2":"YOUR_KEY2","api_key3":"YOUR_KEY3"}' --region us-east-1 --description "OpenAI API keys (key1, key2, key3)"
+```
+
+**Bash/Git Bash (One-liner):**
+```bash
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"YOUR_KEY1","api_key2":"YOUR_KEY2","api_key3":"YOUR_KEY3"}' --region us-east-1 --description "OpenAI API keys (key1, key2, key3)"
+```
+
+**Windows CMD:**
+```cmd
+aws secretsmanager create-secret --name openai/api-key --secret-string "{\"api_key\":\"YOUR_KEY1\",\"api_key2\":\"YOUR_KEY2\",\"api_key3\":\"YOUR_KEY3\"}" --region us-east-1 --description "OpenAI API keys (key1, key2, key3)"
+```
+
+**Note:** The application will automatically try keys in order (key1 → key2 → key3) if one fails.
+
+### Multi-line Commands (For readability)
+
+**PowerShell (using backticks):**
 ```powershell
 aws secretsmanager create-secret `
     --name openai/api-key `
@@ -14,21 +53,7 @@ aws secretsmanager create-secret `
     --description "OpenAI API key"
 ```
 
-### Option 2: Multiple Keys (Recommended for Production)
-
-Supports key rotation and automatic fallback:
-
-```powershell
-aws secretsmanager create-secret `
-    --name openai/api-key `
-    --secret-string '{"api_key":"YOUR_KEY1","api_key2":"YOUR_KEY2","api_key3":"YOUR_KEY3"}' `
-    --region us-east-1 `
-    --description "OpenAI API keys (key1, key2, key3)"
-```
-
-**Note:** The application will automatically try keys in order (key1 → key2 → key3) if one fails.
-
-### Bash/Command Line:
+**Bash/Git Bash (using backslashes):**
 ```bash
 aws secretsmanager create-secret \
     --name openai/api-key \
