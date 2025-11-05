@@ -1,0 +1,17 @@
+{
+  "test": {
+    "default_timeout": 300000,
+    "max_retries": 3,
+    "screenshot_resolution": "1920x1080"
+  },
+  "output": {
+    "dir": "./output"
+  },
+  "logging": {
+    "level": "info"
+  },
+  "openai": {
+    "model": "gpt-4o"
+  }
+}
+
