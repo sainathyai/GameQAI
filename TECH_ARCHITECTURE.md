@@ -101,9 +101,8 @@
 - **Fallback:** Puppeteer (if Browserbase unavailable)
 
 #### AI/LLM Integration
-- **Vercel AI SDK:** `@ai-sdk/openai` or `@ai-sdk/anthropic`
-- **Alternative:** Direct OpenAI SDK or Anthropic SDK
-- **Model:** GPT-4 Vision or Claude Sonnet 3.5 (for vision)
+- **OpenAI SDK:** `openai` (official SDK)
+- **Model:** GPT-4 Vision (GPT-4o recommended)
 
 #### Utilities
 - **dotenv:** Environment variable management
@@ -267,7 +266,7 @@ Log error → Continue or abort
 - `calculateConfidence(evaluation: EvaluationResult): number`
 
 **Dependencies:**
-- Vercel AI SDK or OpenAI/Anthropic SDK
+- OpenAI SDK (official SDK)
 - PromptBuilder
 
 ### 4.5 ReportBuilder

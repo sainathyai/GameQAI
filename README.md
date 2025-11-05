@@ -71,7 +71,7 @@ The project will be implemented in 20 Pull Requests (PRs), following the plan in
 - **Language:** TypeScript 5.x (strict mode)
 - **Package Manager:** Bun
 - **Browser Automation:** Browserbase + Stagehand (cloud, Bun-compatible)
-- **AI/LLM:** Vercel AI SDK + OpenAI GPT-4 Vision
+- **AI/LLM:** OpenAI SDK + GPT-4 Vision (direct SDK integration)
 - **Validation:** zod
 - **Logging:** winston
 - **Testing:** Vitest

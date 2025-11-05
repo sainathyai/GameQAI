@@ -148,7 +148,7 @@ GameQAI/
 - **Runtime:** Node.js 20.x LTS
 - **Language:** TypeScript 5.x (strict mode)
 - **Browser:** Browserbase + Stagehand (primary)
-- **AI/LLM:** Vercel AI SDK + GPT-4 Vision
+- **AI/LLM:** OpenAI SDK + GPT-4 Vision (direct SDK)
 - **Testing:** Vitest
 - **Logging:** Winston
 

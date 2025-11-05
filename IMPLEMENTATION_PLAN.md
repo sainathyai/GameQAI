@@ -365,7 +365,7 @@ src/capture/ArtifactStorage.ts
 ## PR-011: LLM Client Integration
 
 ### Goal
-Integrate LLM API client (Vercel AI SDK or direct API).
+Integrate OpenAI SDK (official SDK).
 
 ### Changes
 - Create `src/evaluation/AIEvaluator.ts` (basic structure)

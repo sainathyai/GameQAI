@@ -122,7 +122,7 @@
 - **Input:** Formatted prompt with evidence
 - **Output:** LLM response with evaluation
 - **Acceptance Criteria:**
-  - Uses Vercel AI SDK or OpenAI/Anthropic API
+  - Uses OpenAI SDK (official SDK)
   - Structured prompt asking:
     1. "Did the game load successfully?" (Yes/No + confidence 0-1)
     2. "Are controls responsive?" (Yes/No + confidence 0-1)
@@ -340,7 +340,7 @@
 
 ### 6.1 External Services
 - **Browserbase:** Browser automation service (free tier: 1 browser-hour)
-- **LLM API:** OpenAI or Anthropic API (or Vercel AI SDK compatible provider)
+- **LLM API:** OpenAI API (via official OpenAI SDK)
 
 ### 6.2 Required APIs
 - Browserbase API key (environment variable)

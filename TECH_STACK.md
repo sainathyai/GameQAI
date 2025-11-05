@@ -91,18 +91,19 @@ This document provides detailed technology stack recommendations for the GameQAI
 
 ## AI/LLM Integration
 
-### ✅ **Vercel AI SDK** (Primary)
+### ✅ **OpenAI SDK** (CONFIRMED - Primary)
 
 - **Why:**
-  - Unified API for multiple LLM providers
-  - Built-in support for OpenAI and Anthropic
-  - Type-safe with TypeScript
-  - Handles streaming, retries, and error handling
-- **Package:** 
-  - `ai` (core SDK)
-  - `@ai-sdk/openai` (OpenAI provider)
-  - `@ai-sdk/anthropic` (Anthropic provider)
-- **Documentation:** https://sdk.vercel.ai/docs
+  - Official SDK from OpenAI
+  - Direct control, simpler code
+  - Full TypeScript support
+  - Handles retries and error handling
+  - No unnecessary abstraction layer
+  - Better documentation for our use case
+  - Simpler dependency tree
+- **Package:** `openai` (official OpenAI SDK)
+- **Documentation:** https://github.com/openai/openai-node
+- **Status:** Confirmed - Direct OpenAI SDK integration
 
 ### ✅ **LLM Models**
 
@@ -110,27 +111,13 @@ This document provides detailed technology stack recommendations for the GameQAI
 - **Model:** `gpt-4-vision-preview` or `gpt-4o` (recommended: `gpt-4o`)
 - **Why:**
   - Excellent vision capabilities for screenshot analysis
-  - Structured output support
+  - Structured output support (JSON mode)
   - Fast response times
   - Better price/performance ratio with GPT-4o
 - **Cost:** ~$0.01-0.03 per test (with screenshots)
 - **API Key:** Required from OpenAI
 - **Status:** Confirmed as primary LLM provider
-
-#### ⚠️ **Alternative: Anthropic Claude Sonnet 3.5** (Not used)
-- **Model:** `claude-sonnet-3-5-20241022`
-- **Why:**
-  - Strong reasoning capabilities
-  - Good vision support
-  - Competitive pricing
-- **Cost:** ~$0.01-0.02 per test
-- **Status:** Available as future alternative if needed
-
-### ⚠️ **Alternative: Direct SDKs**
-
-If Vercel AI SDK doesn't fit:
-- **OpenAI:** `openai` package
-- **Anthropic:** `@anthropic-ai/sdk` package
+- **Integration:** Via OpenAI SDK directly
 
 ---
 
@@ -262,8 +249,7 @@ If Vercel AI SDK doesn't fit:
   "dependencies": {
     "@browserbasehq/sdk": "^1.0.0",
     "@browserbasehq/stagehand": "^1.0.0",
-    "ai": "^3.0.0",
-    "@ai-sdk/openai": "^1.0.0",
+    "openai": "^4.0.0",
     "dotenv": "^16.0.0",
     "zod": "^3.22.0",
     "winston": "^3.11.0",
@@ -292,8 +278,7 @@ If Vercel AI SDK doesn't fit:
 | Bun | 1.x (latest) | Fast runtime, Browserbase compatible |
 | TypeScript | 5.2+ | Latest stable, great features |
 | Browserbase SDK | Latest | Active development |
-| Vercel AI SDK | 3.x | Latest stable |
-| OpenAI SDK | Latest | Via @ai-sdk/openai |
+| OpenAI SDK | Latest | Official OpenAI SDK |
 | zod | 3.22+ | Mature, well-tested |
 | winston | 3.11+ | Stable, production-ready |
 
@@ -348,9 +333,8 @@ If Vercel AI SDK doesn't fit:
 
 | Option | Pros | Cons | Recommendation |
 |--------|------|------|----------------|
-| Vercel AI SDK | Unified API, type-safe | Additional dependency | ✅ Primary |
-| Direct OpenAI SDK | Direct control | More code | ⚠️ Alternative |
-| Direct Anthropic SDK | Direct control | More code | ⚠️ Alternative |
+| OpenAI SDK | Direct control, official, simple | Single provider only | ✅ Primary (Confirmed) |
+| Vercel AI SDK | Unified API, multi-provider | Unnecessary abstraction | ❌ Not needed (single provider) |
 
 ### Testing Framework
 
@@ -404,7 +388,7 @@ If Vercel AI SDK doesn't fit:
 2. **Language:** TypeScript 5.x (strict mode)
 3. **Package Manager:** Bun (unified with runtime)
 4. **Browser:** **Browserbase + Stagehand** (cloud, Bun-compatible)
-5. **AI/LLM:** **Vercel AI SDK + OpenAI GPT-4 Vision** (confirmed)
+5. **AI/LLM:** **OpenAI SDK + GPT-4 Vision** (confirmed - direct SDK)
 6. **Validation:** zod
 7. **Logging:** winston
 8. **Testing:** Vitest
@@ -439,8 +423,7 @@ bun run dev <game-url>
 ### ✅ Compatibility Confirmed
 
 - **Bun + Browserbase:** ✅ Fully compatible (cloud service, HTTP API)
-- **Bun + Vercel AI SDK:** ✅ Fully compatible (standard HTTP requests)
-- **Bun + OpenAI:** ✅ Fully compatible (via Vercel AI SDK)
+- **Bun + OpenAI SDK:** ✅ Fully compatible (official SDK, HTTP requests)
 - **Bun + Stagehand:** ✅ Compatible (via Browserbase SDK)
 
 ---
