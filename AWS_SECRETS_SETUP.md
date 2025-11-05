@@ -26,7 +26,7 @@ aws secretsmanager create-secret \
   --region us-east-1
 ```
 
-#### Option B: JSON Secret (Recommended)
+#### Option B: JSON Secret (Recommended - Single Key)
 
 ```bash
 aws secretsmanager create-secret \
@@ -34,6 +34,19 @@ aws secretsmanager create-secret \
   --secret-string '{"api_key":"sk-your-openai-api-key-here"}' \
   --region us-east-1
 ```
+
+#### Option C: JSON Secret with Multiple Keys (Recommended for Production)
+
+Supports key rotation and fallback with key1, key2, key3:
+
+```bash
+aws secretsmanager create-secret \
+  --name openai/api-key \
+  --secret-string '{"api_key":"sk-key1-here","api_key2":"sk-key2-here","api_key3":"sk-key3-here"}' \
+  --region us-east-1
+```
+
+**Note:** The application will automatically try keys in order (key1 → key2 → key3) if one fails.
 
 ### 2. Configure IAM Permissions
 
@@ -65,6 +78,9 @@ USE_AWS_SECRETS=true
 
 # Secret name (optional, defaults to 'openai/api-key')
 AWS_SECRET_OPENAI_KEY=openai/api-key
+
+# Key number to use (optional, 1, 2, or 3 - defaults to trying all in order)
+AWS_SECRET_OPENAI_KEY_NUMBER=1
 
 # AWS Region (optional, defaults to 'us-east-1')
 AWS_REGION=us-east-1
@@ -128,15 +144,31 @@ Secret Value: "sk-your-openai-api-key-here"
 Secret Name: openai/api-key
 ```
 
-### JSON Secret (Recommended)
+### JSON Secret - Single Key
 ```
 Secret Value: {"api_key":"sk-your-openai-api-key-here"}
 Secret Name: openai/api-key
 ```
 
-The application supports both formats:
-- JSON secrets: Extract `api_key` field
-- Plain text: Use secret value directly
+### JSON Secret - Multiple Keys (Recommended for Production)
+```
+Secret Value: {
+  "api_key": "sk-key1-here",
+  "api_key2": "sk-key2-here",
+  "api_key3": "sk-key3-here"
+}
+Secret Name: openai/api-key
+```
+
+The application supports all formats:
+- **JSON with multiple keys**: Tries `api_key` (key1) first, then `api_key2` (key2), then `api_key3` (key3) if previous fails
+- **JSON with single key**: Uses `api_key` field
+- **Plain text**: Uses secret value directly
+
+**Key Usage Order:**
+1. `api_key` (key1) - Primary key
+2. `api_key2` (key2) - Fallback if key1 fails
+3. `api_key3` (key3) - Fallback if key2 fails
 
 ## Rotation Strategy
 
@@ -146,9 +178,40 @@ The application supports both formats:
 3. No code changes needed
 
 ### Manual Rotation
-1. Update secret in AWS Secrets Manager
+1. Update secret in AWS Secrets Manager (add new key to `api_key2` or `api_key3`)
 2. Call `refreshApiKey()` or invalidate cache
-3. Application fetches new key on next use
+3. Application automatically tries new keys if current key fails
+
+### Using Specific Key Number
+To use a specific key (1, 2, or 3):
+```typescript
+import { AIEvaluator } from './src/evaluation/AIEvaluator.js';
+
+const evaluator = new AIEvaluator();
+
+// Use key2 specifically
+await evaluator.refreshApiKey(2);
+```
+
+Or set environment variable:
+```env
+AWS_SECRET_OPENAI_KEY_NUMBER=2
+```
+
+### Automatic Key Rotation
+The application automatically tries keys in order:
+1. If key1 fails → tries key2
+2. If key2 fails → tries key3
+3. If all keys fail → throws error
+
+### Get All Available Keys
+```typescript
+import { AIEvaluator } from './src/evaluation/AIEvaluator.js';
+
+const evaluator = new AIEvaluator();
+const allKeys = await evaluator.getAllApiKeys();
+console.log(`Found ${allKeys.length} API keys available`);
+```
 
 ## Security Best Practices
 

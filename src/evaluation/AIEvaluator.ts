@@ -46,9 +46,13 @@ export class AIEvaluator {
     if (this.useAWSSecrets) {
       try {
         const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
-        console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
-        apiKey = await this.secretsManager.getOpenAIKey(secretName, true);
-        console.log('[INFO] OpenAI API key retrieved from AWS Secrets Manager');
+        // Try specific key number if specified, otherwise try all keys in order
+        const keyNumber = process.env.AWS_SECRET_OPENAI_KEY_NUMBER 
+          ? parseInt(process.env.AWS_SECRET_OPENAI_KEY_NUMBER, 10) 
+          : undefined;
+        console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}${keyNumber ? ` (key${keyNumber})` : ''}`);
+        apiKey = await this.secretsManager.getOpenAIKey(secretName, keyNumber, true);
+        console.log(`[INFO] OpenAI API key retrieved from AWS Secrets Manager${keyNumber ? ` (key${keyNumber})` : ''}`);
       } catch (error) {
         console.error('[ERROR] Failed to fetch OpenAI key from AWS Secrets Manager', error);
         // Fallback to environment variable
@@ -102,25 +106,29 @@ export class AIEvaluator {
 
   /**
    * Refresh API key from AWS Secrets Manager (for rotation)
+   * 
+   * @param keyNumber - Optional key number (1, 2, or 3) to use. If not specified, tries all keys.
    */
-  async refreshApiKey(): Promise<void> {
+  async refreshApiKey(keyNumber?: number): Promise<void> {
     if (this.useAWSSecrets) {
       try {
         const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
         
-        // Invalidate cache
+        // Invalidate cache for all possible keys
         this.secretsManager.invalidateCache(secretName, 'api_key');
+        this.secretsManager.invalidateCache(secretName, 'api_key2');
+        this.secretsManager.invalidateCache(secretName, 'api_key3');
         this.secretsManager.invalidateCache(secretName);
         
-        // Fetch new key
-        const newApiKey = await this.secretsManager.getOpenAIKey(secretName, false);
+        // Fetch new key (will try key1, key2, key3 in order if keyNumber not specified)
+        const newApiKey = await this.secretsManager.getOpenAIKey(secretName, keyNumber, false);
         
         // Reinitialize client with new key
         this.openai = new OpenAI({
           apiKey: newApiKey,
         });
         
-        console.log('[INFO] OpenAI API key refreshed from AWS Secrets Manager');
+        console.log(`[INFO] OpenAI API key refreshed from AWS Secrets Manager${keyNumber ? ` (key${keyNumber})` : ''}`);
       } catch (error) {
         console.error('[ERROR] Failed to refresh OpenAI API key', error);
         throw new GameQAError(
@@ -130,6 +138,60 @@ export class AIEvaluator {
       }
     } else {
       console.warn('[WARN] API key refresh called but AWS Secrets Manager is not enabled');
+    }
+  }
+
+  /**
+   * Try next API key (for rotation when current key fails)
+   * 
+   * @param currentKeyNumber - Current key number (1, 2, or 3)
+   * @returns Promise that resolves with next API key, or null if no more keys
+   */
+  async tryNextApiKey(currentKeyNumber: number): Promise<string | null> {
+    if (!this.useAWSSecrets) {
+      return null;
+    }
+
+    try {
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+      const nextKeyNumber = currentKeyNumber + 1;
+      
+      // Try next key (max 3)
+      if (nextKeyNumber > 3) {
+        return null;
+      }
+      
+      const apiKey = await this.secretsManager.getOpenAIKey(secretName, nextKeyNumber, false);
+      
+      // Reinitialize client with new key
+      this.openai = new OpenAI({
+        apiKey,
+      });
+      
+      console.log(`[INFO] Switched to OpenAI API key ${nextKeyNumber} from AWS Secrets Manager`);
+      return apiKey;
+    } catch (error) {
+      console.warn(`[WARN] Failed to get API key ${currentKeyNumber + 1}`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Get all available API keys from AWS Secrets Manager
+   * 
+   * @returns Promise that resolves with array of available API keys
+   */
+  async getAllApiKeys(): Promise<string[]> {
+    if (!this.useAWSSecrets) {
+      return [];
+    }
+
+    try {
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+      return await this.secretsManager.getAllOpenAIKeys(secretName, false);
+    } catch (error) {
+      console.error('[ERROR] Failed to get all API keys', error);
+      return [];
     }
   }
 

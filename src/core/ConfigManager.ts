@@ -53,8 +53,12 @@ export async function loadConfig(): Promise<AppConfig> {
       const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
       
       console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
-      openaiApiKey = await secretsManager.getOpenAIKey(secretName, true);
-      console.log('[INFO] OpenAI API key retrieved from AWS Secrets Manager');
+      // Try key1 first, will fallback to key2, key3 automatically
+      const keyNumber = process.env.AWS_SECRET_OPENAI_KEY_NUMBER 
+        ? parseInt(process.env.AWS_SECRET_OPENAI_KEY_NUMBER, 10) 
+        : undefined;
+      openaiApiKey = await secretsManager.getOpenAIKey(secretName, keyNumber, true);
+      console.log(`[INFO] OpenAI API key retrieved from AWS Secrets Manager${keyNumber ? ` (key${keyNumber})` : ''}`);
     } catch (error) {
       console.warn('[WARN] Failed to fetch OpenAI key from AWS Secrets Manager, falling back to environment variable', error);
       // Fallback to environment variable if AWS fetch fails

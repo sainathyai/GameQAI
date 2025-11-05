@@ -2,9 +2,10 @@
 
 ## Quick Command
 
-Replace `YOUR_OPENAI_API_KEY` with your actual OpenAI API key and run:
+### Option 1: Single Key
 
-### PowerShell:
+Replace `YOUR_OPENAI_API_KEY` with your actual OpenAI API key:
+
 ```powershell
 aws secretsmanager create-secret `
     --name openai/api-key `
@@ -12,6 +13,20 @@ aws secretsmanager create-secret `
     --region us-east-1 `
     --description "OpenAI API key"
 ```
+
+### Option 2: Multiple Keys (Recommended for Production)
+
+Supports key rotation and automatic fallback:
+
+```powershell
+aws secretsmanager create-secret `
+    --name openai/api-key `
+    --secret-string '{"api_key":"YOUR_KEY1","api_key2":"YOUR_KEY2","api_key3":"YOUR_KEY3"}' `
+    --region us-east-1 `
+    --description "OpenAI API keys (key1, key2, key3)"
+```
+
+**Note:** The application will automatically try keys in order (key1 → key2 → key3) if one fails.
 
 ### Bash/Command Line:
 ```bash
