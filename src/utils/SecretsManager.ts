@@ -119,25 +119,97 @@ export class SecretsManager {
 
   /**
    * Get OpenAI API key from AWS Secrets Manager
+   * Supports multiple keys (key1, key2, key3) for rotation and fallback
    * 
-   * @param secretName - Name of the secret (default: from env or 'gameqai/openai-api-key')
+   * @param secretName - Name of the secret (default: from env or 'openai/api-key')
+   * @param keyNumber - Key number (1, 2, or 3) - defaults to 1, tries others if fails
    * @param useCache - Whether to use cache
    * @returns Promise that resolves with API key
    */
   async getOpenAIKey(
     secretName?: string,
+    keyNumber?: number,
     useCache: boolean = true
   ): Promise<string> {
     const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
     
-    // Try to get 'api_key' key from JSON secret, or use plain text
-    try {
-      return await this.getSecret(secret, 'api_key', useCache);
-    } catch (error) {
-      // Fallback to plain text secret
-      // Note: JSON secret failed, trying plain text
-      return await this.getSecret(secret, undefined, useCache);
+    // If keyNumber is specified, try that specific key
+    if (keyNumber !== undefined) {
+      const keyName = keyNumber === 1 ? 'api_key' : `api_key${keyNumber}`;
+      try {
+        return await this.getSecret(secret, keyName, useCache);
+      } catch (error) {
+        // If specific key fails, throw error
+        throw new Error(`Failed to get OpenAI API key ${keyNumber}: ${error instanceof Error ? error.message : String(error)}`);
+      }
     }
+    
+    // Try keys in order: api_key (key1), api_key2, api_key3
+    const keysToTry = ['api_key', 'api_key2', 'api_key3'];
+    
+    for (const keyName of keysToTry) {
+      try {
+        const apiKey = await this.getSecret(secret, keyName, useCache);
+        if (apiKey && apiKey.trim().length > 0) {
+          return apiKey;
+        }
+      } catch (error) {
+        // Continue to next key
+        continue;
+      }
+    }
+    
+    // If all JSON keys failed, try plain text secret
+    try {
+      return await this.getSecret(secret, undefined, useCache);
+    } catch (error) {
+      throw new Error(`Failed to get OpenAI API key from secret ${secret}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Get all available OpenAI API keys from AWS Secrets Manager
+   * Returns an array of keys in order (key1, key2, key3)
+   * 
+   * @param secretName - Name of the secret
+   * @param useCache - Whether to use cache
+   * @returns Promise that resolves with array of API keys (may be empty)
+   */
+  async getAllOpenAIKeys(
+    secretName?: string,
+    useCache: boolean = true
+  ): Promise<string[]> {
+    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+    const keys: string[] = [];
+    
+    // Try to get all keys
+    const keysToTry = ['api_key', 'api_key2', 'api_key3'];
+    
+    for (const keyName of keysToTry) {
+      try {
+        const apiKey = await this.getSecret(secret, keyName, useCache);
+        if (apiKey && apiKey.trim().length > 0) {
+          keys.push(apiKey);
+        }
+      } catch (error) {
+        // Continue to next key
+        continue;
+      }
+    }
+    
+    // If no JSON keys found, try plain text
+    if (keys.length === 0) {
+      try {
+        const plainTextKey = await this.getSecret(secret, undefined, useCache);
+        if (plainTextKey && plainTextKey.trim().length > 0) {
+          keys.push(plainTextKey);
+        }
+      } catch (error) {
+        // No keys found
+      }
+    }
+    
+    return keys;
   }
 
   /**
