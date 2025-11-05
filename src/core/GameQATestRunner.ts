@@ -359,7 +359,7 @@ export class GameQATestRunner {
     try {
       await this.browserAgent.close();
     } catch (error) {
-      log.warn('Cleanup failed', error);
+      log.warn('Cleanup failed', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 

@@ -7,12 +7,8 @@
 import { BrowserAgent } from '../browser/BrowserAgent.js';
 import { Screenshot } from '../core/types.js';
 import { log } from '../utils/logger.js';
-import { GameQAError, ErrorType } from '../core/types.js';
 import { mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
-
-// Note: Screenshot capture implementation is structured
-// Actual screenshot bytes will come from Browserbase API
 
 // Note: Screenshot capture implementation is structured
 // Actual screenshot bytes will come from Browserbase API
