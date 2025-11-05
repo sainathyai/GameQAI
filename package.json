@@ -1,0 +1,46 @@
+{
+  "name": "gameqai",
+  "version": "1.0.0",
+  "description": "Browser Game QA Pipeline - AI-powered automated testing for browser games",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src",
+    "typecheck": "bun run --bun tsc --noEmit"
+  },
+  "dependencies": {
+    "@browserbasehq/sdk": "^1.0.0",
+    "@browserbasehq/stagehand": "^1.0.0",
+    "openai": "^4.0.0",
+    "dotenv": "^16.0.0",
+    "zod": "^3.22.0",
+    "winston": "^3.11.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.2.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "keywords": [
+    "browser-automation",
+    "game-testing",
+    "qa",
+    "ai",
+    "openai",
+    "browserbase"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
