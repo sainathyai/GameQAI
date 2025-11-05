@@ -50,7 +50,7 @@ export async function loadConfig(): Promise<AppConfig> {
   if (useAWSSecrets && !openaiApiKey) {
     try {
       const secretsManager = getSecretsManager();
-      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
       
       console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
       openaiApiKey = await secretsManager.getOpenAIKey(secretName, true);

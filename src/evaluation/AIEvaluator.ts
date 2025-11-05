@@ -45,7 +45,7 @@ export class AIEvaluator {
     // Fetch API key from AWS Secrets Manager if configured
     if (this.useAWSSecrets) {
       try {
-        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
         console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
         apiKey = await this.secretsManager.getOpenAIKey(secretName, true);
         console.log('[INFO] OpenAI API key retrieved from AWS Secrets Manager');
@@ -106,7 +106,7 @@ export class AIEvaluator {
   async refreshApiKey(): Promise<void> {
     if (this.useAWSSecrets) {
       try {
-        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
         
         // Invalidate cache
         this.secretsManager.invalidateCache(secretName, 'api_key');

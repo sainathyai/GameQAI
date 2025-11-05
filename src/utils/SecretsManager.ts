@@ -128,7 +128,7 @@ export class SecretsManager {
     secretName?: string,
     useCache: boolean = true
   ): Promise<string> {
-    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'gameqai/openai-api-key';
+    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
     
     // Try to get 'api_key' key from JSON secret, or use plain text
     try {

@@ -21,7 +21,7 @@ This guide explains how to set up AWS Secrets Manager for storing and rotating t
 
 ```bash
 aws secretsmanager create-secret \
-  --name gameqai/openai-api-key \
+  --name openai/api-key \
   --secret-string "sk-your-openai-api-key-here" \
   --region us-east-1
 ```
@@ -30,7 +30,7 @@ aws secretsmanager create-secret \
 
 ```bash
 aws secretsmanager create-secret \
-  --name gameqai/openai-api-key \
+  --name openai/api-key \
   --secret-string '{"api_key":"sk-your-openai-api-key-here"}' \
   --region us-east-1
 ```
@@ -49,7 +49,7 @@ The Lambda function or application needs permission to read the secret:
         "secretsmanager:GetSecretValue",
         "secretsmanager:DescribeSecret"
       ],
-      "Resource": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:gameqai/openai-api-key-*"
+      "Resource": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:openai/api-key-*"
     }
   ]
 }
@@ -63,8 +63,8 @@ Set these environment variables:
 # Enable AWS Secrets Manager
 USE_AWS_SECRETS=true
 
-# Secret name (optional, defaults to 'gameqai/openai-api-key')
-AWS_SECRET_OPENAI_KEY=gameqai/openai-api-key
+# Secret name (optional, defaults to 'openai/api-key')
+AWS_SECRET_OPENAI_KEY=openai/api-key
 
 # AWS Region (optional, defaults to 'us-east-1')
 AWS_REGION=us-east-1
@@ -114,7 +114,7 @@ import { getSecretsManager } from './src/utils/SecretsManager.js';
 const secretsManager = getSecretsManager();
 
 // Invalidate cache for a specific secret
-secretsManager.invalidateCache('gameqai/openai-api-key', 'api_key');
+secretsManager.invalidateCache('openai/api-key', 'api_key');
 
 // Or clear all cache
 secretsManager.clearAllCache();
@@ -125,11 +125,13 @@ secretsManager.clearAllCache();
 ### Plain Text Secret
 ```
 Secret Value: "sk-your-openai-api-key-here"
+Secret Name: openai/api-key
 ```
 
 ### JSON Secret (Recommended)
 ```
 Secret Value: {"api_key":"sk-your-openai-api-key-here"}
+Secret Name: openai/api-key
 ```
 
 The application supports both formats:
@@ -201,7 +203,7 @@ The application supports both formats:
 import { getSecretsManager } from './src/utils/SecretsManager.js';
 
 const secretsManager = getSecretsManager();
-const apiKey = await secretsManager.getOpenAIKey('gameqai/openai-api-key', false);
+const apiKey = await secretsManager.getOpenAIKey('openai/api-key', false);
 console.log('API Key retrieved:', apiKey ? 'Success' : 'Failed');
 ```
 
@@ -210,7 +212,7 @@ console.log('API Key retrieved:', apiKey ? 'Success' : 'Failed');
 ```bash
 # Set environment variables
 export USE_AWS_SECRETS=true
-export AWS_SECRET_OPENAI_KEY=gameqai/openai-api-key
+export AWS_SECRET_OPENAI_KEY=openai/api-key
 export AWS_REGION=us-east-1
 
 # Run application
