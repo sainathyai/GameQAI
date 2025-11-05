@@ -11,7 +11,7 @@ aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_ke
 
 **Bash/Git Bash:**
 ```bash
-aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"YOUR_OPENAI_API_KEY"}' --region us-east-1 --description "OpenAI API key"
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key1":"YOUR_OPENAI_API_KEY"}' --region us-east-1 --description "OpenAI API key"
 ```
 
 **Windows CMD:**
@@ -28,7 +28,7 @@ aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_ke
 
 **Bash/Git Bash:**
 ```bash
-aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"KEY1","api_key2":"KEY2","api_key3":"KEY3"}' --region us-east-1 --description "OpenAI API keys"
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key1":"KEY1","api_key2":"KEY2","api_key3":"KEY3"}' --region us-east-1 --description "OpenAI API keys"
 ```
 
 **Windows CMD:**
@@ -46,14 +46,14 @@ Replace these with your actual values:
 
 **Bash/Git Bash:**
 ```bash
-aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"sk-proj-abc123xyz"}' --region us-east-1 --description "OpenAI API key"
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key1":"sk-proj-abc123xyz"}' --region us-east-1 --description "OpenAI API key"
 ```
 
 ## Example (Multiple Keys)
 
 **Bash/Git Bash:**
 ```bash
-aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key":"sk-proj-key1","api_key2":"sk-proj-key2","api_key3":"sk-proj-key3"}' --region us-east-1 --description "OpenAI API keys"
+aws secretsmanager create-secret --name openai/api-key --secret-string '{"api_key1":"sk-proj-key1","api_key2":"sk-proj-key2","api_key3":"sk-proj-key3"}' --region us-east-1 --description "OpenAI API keys"
 ```
 
 ## Verify Secret Created

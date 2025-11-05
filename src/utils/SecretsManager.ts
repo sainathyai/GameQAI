@@ -119,10 +119,10 @@ export class SecretsManager {
 
   /**
    * Get OpenAI API key from AWS Secrets Manager
-   * Supports multiple keys (key1, key2, key3) for rotation and fallback
+   * Supports multiple numbered keys (api_key1, api_key2, api_key3) for rotation and fallback
    * 
    * @param secretName - Name of the secret (default: from env or 'openai/api-key')
-   * @param keyNumber - Key number (1, 2, or 3) - defaults to 1, tries others if fails
+   * @param keyNumber - Key number (1, 2, or 3) - defaults to trying all in order
    * @param useCache - Whether to use cache
    * @returns Promise that resolves with API key
    */
@@ -135,7 +135,7 @@ export class SecretsManager {
     
     // If keyNumber is specified, try that specific key
     if (keyNumber !== undefined) {
-      const keyName = keyNumber === 1 ? 'api_key' : `api_key${keyNumber}`;
+      const keyName = `api_key${keyNumber}`;
       try {
         return await this.getSecret(secret, keyName, useCache);
       } catch (error) {
@@ -144,8 +144,8 @@ export class SecretsManager {
       }
     }
     
-    // Try keys in order: api_key (key1), api_key2, api_key3
-    const keysToTry = ['api_key', 'api_key2', 'api_key3'];
+    // Try keys in order: api_key1, api_key2, api_key3 (numbered keys only)
+    const keysToTry = ['api_key1', 'api_key2', 'api_key3'];
     
     for (const keyName of keysToTry) {
       try {
@@ -169,7 +169,7 @@ export class SecretsManager {
 
   /**
    * Get all available OpenAI API keys from AWS Secrets Manager
-   * Returns an array of keys in order (key1, key2, key3)
+   * Returns an array of numbered keys in order (api_key1, api_key2, api_key3)
    * 
    * @param secretName - Name of the secret
    * @param useCache - Whether to use cache
@@ -182,8 +182,8 @@ export class SecretsManager {
     const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
     const keys: string[] = [];
     
-    // Try to get all keys
-    const keysToTry = ['api_key', 'api_key2', 'api_key3'];
+    // Try to get all numbered keys (api_key1, api_key2, api_key3)
+    const keysToTry = ['api_key1', 'api_key2', 'api_key3'];
     
     for (const keyName of keysToTry) {
       try {

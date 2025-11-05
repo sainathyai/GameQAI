@@ -26,27 +26,30 @@ aws secretsmanager create-secret \
   --region us-east-1
 ```
 
-#### Option B: JSON Secret (Recommended - Single Key)
+#### Option B: JSON Secret with Numbered Keys (Required Format)
 
+All keys must be numbered (`api_key1`, `api_key2`, `api_key3`, etc.):
+
+**Single Key:**
 ```bash
 aws secretsmanager create-secret \
   --name openai/api-key \
-  --secret-string '{"api_key":"sk-your-openai-api-key-here"}' \
+  --secret-string '{"api_key1":"sk-your-openai-api-key-here"}' \
   --region us-east-1
 ```
 
-#### Option C: JSON Secret with Multiple Keys (Recommended for Production)
-
-Supports key rotation and fallback with key1, key2, key3:
-
+**Multiple Keys (Recommended for Production):**
 ```bash
 aws secretsmanager create-secret \
   --name openai/api-key \
-  --secret-string '{"api_key":"sk-key1-here","api_key2":"sk-key2-here","api_key3":"sk-key3-here"}' \
+  --secret-string '{"api_key1":"sk-key1-here","api_key2":"sk-key2-here","api_key3":"sk-key3-here"}' \
   --region us-east-1
 ```
 
-**Note:** The application will automatically try keys in order (key1 → key2 → key3) if one fails.
+**Note:** 
+- The application only supports numbered keys (`api_key1`, `api_key2`, `api_key3`) for consistency
+- Keys are tried in order (api_key1 → api_key2 → api_key3) if one fails
+- Currently supports up to 3 keys (api_key1, api_key2, api_key3)
 
 ### 2. Configure IAM Permissions
 
@@ -144,31 +147,25 @@ Secret Value: "sk-your-openai-api-key-here"
 Secret Name: openai/api-key
 ```
 
-### JSON Secret - Single Key
-```
-Secret Value: {"api_key":"sk-your-openai-api-key-here"}
-Secret Name: openai/api-key
-```
+### JSON Secret - Numbered Keys (Required Format)
 
-### JSON Secret - Multiple Keys (Recommended for Production)
+All keys must be numbered for consistency. Use `api_key1`, `api_key2`, `api_key3`, etc.
+
 ```
 Secret Value: {
-  "api_key": "sk-key1-here",
+  "api_key1": "sk-key1-here",
   "api_key2": "sk-key2-here",
   "api_key3": "sk-key3-here"
 }
 Secret Name: openai/api-key
 ```
 
-The application supports all formats:
-- **JSON with multiple keys**: Tries `api_key` (key1) first, then `api_key2` (key2), then `api_key3` (key3) if previous fails
-- **JSON with single key**: Uses `api_key` field
-- **Plain text**: Uses secret value directly
-
 **Key Usage Order:**
-1. `api_key` (key1) - Primary key
-2. `api_key2` (key2) - Fallback if key1 fails
-3. `api_key3` (key3) - Fallback if key2 fails
+1. `api_key1` - Primary key (tried first)
+2. `api_key2` - Fallback if key1 fails
+3. `api_key3` - Fallback if key2 fails
+
+**Note:** The application only supports numbered keys (`api_key1`, `api_key2`, `api_key3`) for consistency. The unnumbered `api_key` format is not supported.
 
 ## Rotation Strategy
 
