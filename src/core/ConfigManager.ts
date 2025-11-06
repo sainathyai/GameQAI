@@ -42,7 +42,16 @@ const ConfigSchema = z.object({
  */
 export async function loadConfig(): Promise<AppConfig> {
   // Determine if we should use AWS Secrets Manager
-  const useAWSSecrets = process.env.USE_AWS_SECRETS === 'true' || process.env.AWS_SECRET_OPENAI_KEY;
+  // Use AWS Secrets Manager only if:
+  // 1. Explicitly enabled via USE_AWS_SECRETS=true, OR
+  // 2. Running in Lambda environment (AWS_LAMBDA_FUNCTION_NAME is set), OR
+  // 3. AWS_SECRET_OPENAI_KEY is explicitly set
+  // Otherwise, use .env file for local development
+  const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  const useAWSSecrets = 
+    process.env.USE_AWS_SECRETS === 'true' || 
+    isLambda ||
+    (!!process.env.AWS_SECRET_OPENAI_KEY && process.env.USE_AWS_SECRETS !== 'false');
 
   let openaiApiKey = process.env.OPENAI_API_KEY || '';
 
@@ -50,7 +59,7 @@ export async function loadConfig(): Promise<AppConfig> {
   if (useAWSSecrets && !openaiApiKey) {
     try {
       const secretsManager = getSecretsManager();
-      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
       
       console.log(`[INFO] Fetching OpenAI API key from AWS Secrets Manager: ${secretName}`);
       // Try key1 first, will fallback to key2, key3 automatically
@@ -64,6 +73,10 @@ export async function loadConfig(): Promise<AppConfig> {
       // Fallback to environment variable if AWS fetch fails
       openaiApiKey = process.env.OPENAI_API_KEY || '';
     }
+  } else {
+    // Use .env file for local development
+    console.log('[INFO] Using OpenAI API key from .env file (local development)');
+    openaiApiKey = process.env.OPENAI_API_KEY || '';
   }
 
   // Load environment variables

@@ -79,8 +79,8 @@ Set these environment variables:
 # Enable AWS Secrets Manager
 USE_AWS_SECRETS=true
 
-# Secret name (optional, defaults to 'openai/api-key')
-AWS_SECRET_OPENAI_KEY=openai/api-key
+# Secret name (optional, defaults to 'sainathyai')
+AWS_SECRET_OPENAI_KEY=sainathyai
 
 # Key number to use (optional, 1, 2, or 3 - defaults to trying all in order)
 AWS_SECRET_OPENAI_KEY_NUMBER=1

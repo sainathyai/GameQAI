@@ -9,6 +9,8 @@
     "start": "tsx src/index.ts",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
+    "test:aws-secrets": "tsx scripts/test-aws-secrets.ts",
+    "test:setup": "tsx scripts/test-setup.ts",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "build": "tsc"

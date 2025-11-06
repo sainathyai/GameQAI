@@ -22,9 +22,16 @@ export class AIEvaluator {
 
   constructor() {
     // Check if we should use AWS Secrets Manager
+    // Use AWS Secrets Manager only if:
+    // 1. Explicitly enabled via USE_AWS_SECRETS=true, OR
+    // 2. Running in Lambda environment, OR
+    // 3. AWS_SECRET_OPENAI_KEY is explicitly set (and not disabled)
+    // Otherwise, use .env file for local development
+    const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
     this.useAWSSecrets = 
       process.env.USE_AWS_SECRETS === 'true' || 
-      !!process.env.AWS_SECRET_OPENAI_KEY;
+      isLambda ||
+      (!!process.env.AWS_SECRET_OPENAI_KEY && process.env.USE_AWS_SECRETS !== 'false');
     
     log.info('AI Evaluator initializing', {
       useAWSSecrets: this.useAWSSecrets,
@@ -45,7 +52,7 @@ export class AIEvaluator {
     // Fetch API key from AWS Secrets Manager if configured
     if (this.useAWSSecrets) {
       try {
-        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
         // Try specific key number if specified, otherwise try all keys in order
         const keyNumber = process.env.AWS_SECRET_OPENAI_KEY_NUMBER 
           ? parseInt(process.env.AWS_SECRET_OPENAI_KEY_NUMBER, 10) 
@@ -112,7 +119,7 @@ export class AIEvaluator {
   async refreshApiKey(keyNumber?: number): Promise<void> {
     if (this.useAWSSecrets) {
       try {
-        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+        const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
         
         // Invalidate cache for all possible keys
         this.secretsManager.invalidateCache(secretName, 'api_key');
@@ -153,7 +160,7 @@ export class AIEvaluator {
     }
 
     try {
-      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
       const nextKeyNumber = currentKeyNumber + 1;
       
       // Try next key (max 3)
@@ -187,7 +194,7 @@ export class AIEvaluator {
     }
 
     try {
-      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+      const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
       return await this.secretsManager.getAllOpenAIKeys(secretName, false);
     } catch (error) {
       console.error('[ERROR] Failed to get all API keys', error);

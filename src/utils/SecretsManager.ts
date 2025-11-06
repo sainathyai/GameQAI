@@ -121,7 +121,7 @@ export class SecretsManager {
    * Get OpenAI API key from AWS Secrets Manager
    * Supports multiple numbered keys (api_key1, api_key2, api_key3) for rotation and fallback
    * 
-   * @param secretName - Name of the secret (default: from env or 'openai/api-key')
+   * @param secretName - Name of the secret (default: from env or 'sainathyai')
    * @param keyNumber - Key number (1, 2, or 3) - defaults to trying all in order
    * @param useCache - Whether to use cache
    * @returns Promise that resolves with API key
@@ -131,7 +131,7 @@ export class SecretsManager {
     keyNumber?: number,
     useCache: boolean = true
   ): Promise<string> {
-    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
     
     // If keyNumber is specified, try that specific key
     if (keyNumber !== undefined) {
@@ -179,7 +179,7 @@ export class SecretsManager {
     secretName?: string,
     useCache: boolean = true
   ): Promise<string[]> {
-    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+    const secret = secretName || process.env.AWS_SECRET_OPENAI_KEY || 'sainathyai';
     const keys: string[] = [];
     
     // Try to get all numbered keys (api_key1, api_key2, api_key3)
@@ -192,7 +192,12 @@ export class SecretsManager {
           keys.push(apiKey);
         }
       } catch (error) {
-        // Continue to next key
+        // Silently continue to next key (keys 2 and 3 are optional)
+        // Only log if it's a non-optional error
+        if (keyName === 'api_key1') {
+          // Log error for key1 since it's required
+          console.error(`[ERROR] Failed to fetch required key ${keyName}:`, error);
+        }
         continue;
       }
     }
