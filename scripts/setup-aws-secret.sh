@@ -20,12 +20,12 @@ echo "✅ AWS CLI found"
 echo ""
 
 # Get secret name
-SECRET_NAME="${AWS_SECRET_OPENAI_KEY:-openai/api-key}"
+SECRET_NAME="${AWS_SECRET_OPENAI_KEY:-YOUR_SECRET_NAME}"
 echo "Secret name: $SECRET_NAME"
 echo ""
 
 # Get AWS region
-AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_REGION="${AWS_REGION:-YOUR_AWS_REGION}"
 echo "AWS Region: $AWS_REGION"
 echo ""
 

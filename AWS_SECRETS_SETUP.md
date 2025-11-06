@@ -21,9 +21,9 @@ This guide explains how to set up AWS Secrets Manager for storing and rotating t
 
 ```bash
 aws secretsmanager create-secret \
-  --name openai/api-key \
+  --name YOUR_SECRET_NAME \
   --secret-string "sk-your-openai-api-key-here" \
-  --region us-east-1
+  --region YOUR_AWS_REGION
 ```
 
 #### Option B: JSON Secret with Numbered Keys (Required Format)
@@ -33,17 +33,17 @@ All keys must be numbered (`api_key1`, `api_key2`, `api_key3`, etc.):
 **Single Key:**
 ```bash
 aws secretsmanager create-secret \
-  --name openai/api-key \
+  --name YOUR_SECRET_NAME \
   --secret-string '{"api_key1":"sk-your-openai-api-key-here"}' \
-  --region us-east-1
+  --region YOUR_AWS_REGION
 ```
 
 **Multiple Keys (Recommended for Production):**
 ```bash
 aws secretsmanager create-secret \
-  --name openai/api-key \
+  --name YOUR_SECRET_NAME \
   --secret-string '{"api_key1":"sk-key1-here","api_key2":"sk-key2-here","api_key3":"sk-key3-here"}' \
-  --region us-east-1
+  --region YOUR_AWS_REGION
 ```
 
 **Note:** 
@@ -65,7 +65,7 @@ The Lambda function or application needs permission to read the secret:
         "secretsmanager:GetSecretValue",
         "secretsmanager:DescribeSecret"
       ],
-      "Resource": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:openai/api-key-*"
+      "Resource": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:YOUR_SECRET_NAME-*"
     }
   ]
 }
@@ -79,14 +79,14 @@ Set these environment variables:
 # Enable AWS Secrets Manager
 USE_AWS_SECRETS=true
 
-# Secret name (optional, defaults to 'sainathyai')
-AWS_SECRET_OPENAI_KEY=sainathyai
+# Secret name (optional, defaults to your secret name)
+AWS_SECRET_OPENAI_KEY=YOUR_SECRET_NAME
 
 # Key number to use (optional, 1, 2, or 3 - defaults to trying all in order)
 AWS_SECRET_OPENAI_KEY_NUMBER=1
 
-# AWS Region (optional, defaults to 'us-east-1')
-AWS_REGION=us-east-1
+# AWS Region (optional, defaults to your configured region)
+AWS_REGION=YOUR_AWS_REGION
 ```
 
 ### 4. AWS Credentials
@@ -101,7 +101,7 @@ For Local Development:
   ```env
   AWS_ACCESS_KEY_ID=your-access-key
   AWS_SECRET_ACCESS_KEY=your-secret-key
-  AWS_REGION=us-east-1
+  AWS_REGION=YOUR_AWS_REGION
   ```
 
 ## Usage
@@ -133,7 +133,7 @@ import { getSecretsManager } from './src/utils/SecretsManager.js';
 const secretsManager = getSecretsManager();
 
 // Invalidate cache for a specific secret
-secretsManager.invalidateCache('openai/api-key', 'api_key');
+secretsManager.invalidateCache('YOUR_SECRET_NAME', 'api_key');
 
 // Or clear all cache
 secretsManager.clearAllCache();
@@ -144,7 +144,7 @@ secretsManager.clearAllCache();
 ### Plain Text Secret
 ```
 Secret Value: "sk-your-openai-api-key-here"
-Secret Name: openai/api-key
+Secret Name: YOUR_SECRET_NAME
 ```
 
 ### JSON Secret - Numbered Keys (Required Format)
@@ -157,7 +157,7 @@ Secret Value: {
   "api_key2": "sk-key2-here",
   "api_key3": "sk-key3-here"
 }
-Secret Name: openai/api-key
+Secret Name: YOUR_SECRET_NAME
 ```
 
 **Key Usage Order:**
@@ -263,7 +263,7 @@ console.log(`Found ${allKeys.length} API keys available`);
 import { getSecretsManager } from './src/utils/SecretsManager.js';
 
 const secretsManager = getSecretsManager();
-const apiKey = await secretsManager.getOpenAIKey('openai/api-key', false);
+const apiKey = await secretsManager.getOpenAIKey('YOUR_SECRET_NAME', false);
 console.log('API Key retrieved:', apiKey ? 'Success' : 'Failed');
 ```
 
@@ -272,8 +272,8 @@ console.log('API Key retrieved:', apiKey ? 'Success' : 'Failed');
 ```bash
 # Set environment variables
 export USE_AWS_SECRETS=true
-export AWS_SECRET_OPENAI_KEY=openai/api-key
-export AWS_REGION=us-east-1
+export AWS_SECRET_OPENAI_KEY=YOUR_SECRET_NAME
+export AWS_REGION=YOUR_AWS_REGION
 
 # Run application
 npm run dev <game-url>

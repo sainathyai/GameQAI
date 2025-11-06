@@ -18,12 +18,12 @@ try {
 Write-Host ""
 
 # Get secret name
-$secretName = if ($env:AWS_SECRET_OPENAI_KEY) { $env:AWS_SECRET_OPENAI_KEY } else { "openai/api-key" }
+$secretName = if ($env:AWS_SECRET_OPENAI_KEY) { $env:AWS_SECRET_OPENAI_KEY } else { "YOUR_SECRET_NAME" }
 Write-Host "Secret name: $secretName" -ForegroundColor Yellow
 Write-Host ""
 
 # Get AWS region
-$awsRegion = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
+$awsRegion = if ($env:AWS_REGION) { $env:AWS_REGION } else { "YOUR_AWS_REGION" }
 Write-Host "AWS Region: $awsRegion" -ForegroundColor Yellow
 Write-Host ""
 

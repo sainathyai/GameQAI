@@ -18,7 +18,7 @@ async function testAWSSecrets() {
     const useAWSSecrets = process.env.USE_AWS_SECRETS === 'true' || !!process.env.AWS_SECRET_OPENAI_KEY;
     console.log('1. AWS Secrets Manager Status:');
     console.log(`   Enabled: ${useAWSSecrets ? '✅ Yes' : '❌ No'}`);
-    const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key (default)';
+    const secretName = process.env.AWS_SECRET_OPENAI_KEY || 'YOUR_SECRET_NAME (default)';
     const region = process.env.AWS_REGION || 'us-east-1 (default)';
     console.log(`   Secret Name: ${secretName}`);
     console.log(`   Region: ${region}`);
@@ -28,7 +28,7 @@ async function testAWSSecrets() {
       console.log('⚠️  AWS Secrets Manager is not enabled.');
       console.log('   Set environment variables:');
       console.log('   USE_AWS_SECRETS=true');
-      console.log('   AWS_SECRET_OPENAI_KEY=openai/api-key');
+      console.log('   AWS_SECRET_OPENAI_KEY=YOUR_SECRET_NAME');
       console.log('   AWS_REGION=us-east-1');
       return;
     }
@@ -36,7 +36,7 @@ async function testAWSSecrets() {
     // Test 2: Fetch individual keys
     console.log('2. Testing Individual Key Fetch:');
     const secretsManager = getSecretsManager();
-    const testSecretName = process.env.AWS_SECRET_OPENAI_KEY || 'openai/api-key';
+    const testSecretName = process.env.AWS_SECRET_OPENAI_KEY || 'YOUR_SECRET_NAME';
 
     try {
       const key1 = await secretsManager.getOpenAIKey(testSecretName, 1, false);
